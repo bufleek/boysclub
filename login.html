@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Boys Club 2015</title>
+    <link rel="stylesheet" href="static/css/normalize.css">
+    <link rel="stylesheet" href="static/css/skeleton.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="static/js/jquery-3.4.1.js"></script>
+</head>
+<body>
+    <div id="login_container">
+        <div class="container">
+            <form action="#" method="post" id="login">
+                <h3>Login Boys Club</h3>
+                <h5 id="login_error" class="danger"></h5>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="login_username" placeholder="Enter username" class="u-full-width">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your Password" class="u-full-width">
+                <input type="submit" value="Login" class="button-primary">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            function faulty_input(input){
+                $("#"+input).addClass('faulty_input').on("animationend", ()=>{
+                    $("#"+input).removeClass("faulty_input");
+                });
+            }
+
+            function faulty_error_message(error){
+                $("#login_error").html(error);
+                setTimeout(()=>{
+                    $("#login_error").html("");
+                }, 2000); 
+            }
+
+            $("#login").submit(function(e){
+                var formData = new FormData(this);
+                e.preventDefault();
+                var input_okay = true;
+                if($("#username").val().replace(/ /g, "") == ""){
+                    faulty_input("username");
+                    $("#username").val("");
+                    input_okay = false;
+                }
+
+                if($("#password").val().replace(/ /g, "") == ""){
+                    faulty_input("password");
+                    $("#password").val("");
+                    input_okay = false;
+                }
+
+                if(input_okay){
+                    $.ajax({
+                        url : "static/includes/action.php",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        cache: false,
+                        beforeSend: function(){
+                            $("#login input").prop("disabled", true);
+                        },
+                        success: function(response){
+                            if(response == "no user"){
+                                faulty_input("username");
+                                faulty_error_message("Username is not registered");
+                            }
+
+                            else if(response == "wrong password"){
+                                faulty_input("password");
+                                faulty_error_message("Wrong Password");
+                            }
+
+                            else if(response == "logged in"){
+                                window.location.href = "index.php";
+                            }
+
+                            else{
+                                faulty_error_message("Unknown error");
+                            }
+                            $("#login input").prop("disabled", false);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

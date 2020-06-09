@@ -1,0 +1,149 @@
+<?php
+
+session_start();
+
+function logout(){
+    session_unset();
+    session_destroy();
+    header("location: login.html");
+}
+
+if(isset($_SESSION['me'])){
+    include 'static/classes/db.php';
+    $me = $_SESSION['me'];
+    $me_name = $_SESSION['me_username'];
+
+    $conn = new Db;
+    $conn = $conn->connect();
+
+    $stmt = mysqli_stmt_init($conn);
+    $sql = "SELECT * FROM bc_members WHERE id=? AND username=?";
+
+    if(mysqli_stmt_prepare($stmt, $sql)){
+        mysqli_stmt_bind_param($stmt, "ss", $me, $me_name);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if($result->num_rows !== 1){
+            logout();
+        }else{
+            $row = $result->fetch_assoc();
+
+            if($me_name !== $row['name']){
+                logout();
+            }
+        }
+    }else{
+        logout();
+    }
+
+}else{
+    logout();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/skeleton.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/all.css">
+    <link rel="stylesheet" href="static/css/fontawesome.css">
+    <script src="static/js/jquery-3.4.1.js"></script>
+    <title>Boys Club</title>
+</head>
+<style>
+    *{
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    body{
+        background-image: linear-gradient(45.34deg, #5B507A 5.66%, #9EADC8 94.35%);
+        height: 100vh;
+    }
+    #body{
+        max-height: 100%;
+        overflow-y: scroll;
+    }
+</style>
+<body>
+    <div id="body">
+        <div id="top">
+            <div class="container" id="top_nav">
+                <h4 class="family_2"><i class="fab fa-angellist"></i> Boys Club</h4>
+                <div>
+                    <span id="user" class="fa fa-user-alt"></span>
+                </div>
+            </div>
+            <div id="user_info_container">
+                <div class="container" id="user_info">
+                    <div id="info">
+                        <span>Name: <?php echo $_SESSION['me_name']?></span>
+                        <!--<span>Username: Bruno</span>-->
+                        <span>Role: <?php echo $_SESSION['me_role']?></span>
+                    </div>
+                    <div id="user_amount">
+                        Amount: <?php echo $_SESSION['me_amount']?>
+                    </div>
+                    <div id="user_info_links" class="family_1">
+                        <span id="edit_details_link">Edit Details</span>
+                        <span id="logout">Logout</span>
+                    </div>
+                </div>
+
+                <!--<div id="edit_details" class="container">
+                        <div id="edit_details_links">
+                            <a id="edit_username" class="t-primary">Change Username</a>
+                            <a id="edit_password" class="t-primary">Change Password</a>
+                        </div>
+
+                        <div id="edit_success" class="t-primary text-center">Success</div>
+                        <div id="edit_message" class="warning text-center">Message</div>
+                        <div id="edit">
+                            <label for="n_username">New Username:</label>
+                            <input type="text" class="u-full-width">
+                            <label for="confirm_password">Confirm Password:</label>
+                            <input type="password" name="" id="confirm_password" class="u-full-width">
+                            <input type="submit" value="Change" id="submit_new_username" class="submit u-full-width"">
+                        </div>
+                    <div>
+
+                    </div>
+                </div>-->
+            </div>
+        </div>
+        <div class="container">
+            <h5 class="text-center family_2">Account Total : <span id="account_total">1000</span></h5>
+            <h4>Members - <span id="members_total">9</span></h4>
+    
+            <div id="table_container">
+                <table>
+                    <thead>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Role</th>
+                    </thead>
+                    <tbody class="family_1" id="members_tbody">
+    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="overall_display" class="hidden_bottom">
+        <div class="container">
+            <div id="close_overall_display">
+                <span class="fas fa-times"></span>
+            </div>
+            <div id="overall_display_content">
+
+            </div>
+        </div>
+    </div>
+
+<script src="static/js/site.js"></script>
+</body>
+</html>
