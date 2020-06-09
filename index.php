@@ -29,7 +29,7 @@ if(isset($_SESSION['me'])){
         }else{
             $row = $result->fetch_assoc();
 
-            if($me_name !== $row['name']){
+            if($me_name !== $row['username']){
                 logout();
             }
         }
